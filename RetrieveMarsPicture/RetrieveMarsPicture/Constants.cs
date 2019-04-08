@@ -15,7 +15,7 @@ namespace Sincioco {
 		public const string localPathForSavingImages = workingDirectory;
 
 		// The name of the text file that contains the list of dates
-		public const string requestFile = workingDirectory + "NASARequest.txt";
+		public const string inputFileWithListOfDates = workingDirectory + "NASARequest.txt";
 
 		// A list of dates for NASARequest.txt in case we have to create it (we use the provided dates from the test)
 		public static readonly string[] sampleTextFileWithDates = { "02/27/17", "June 2, 2018", "Jul-13-2016", "April 31, 2018" };
