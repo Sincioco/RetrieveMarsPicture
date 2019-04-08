@@ -11,7 +11,7 @@ Created this fun little program that can download a series of MARS images from N
 
 # Areas that Can Be Improved On
 
-  - Configurable values could be read-in as a config file.
+  - Hard-coded or configurable values could be read-in as a config file.
   - We could use more unit testing.
   - We could use more advance logging either to a text file or to a databse.
   - We could have stored the images into a database.
