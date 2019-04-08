@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Sincioco {
-	public class ResultfromNASA {
+	public class Result {
 		public string copyright { get; set; }
 		public string date { get; set; }
 		public string explanation { get; set; }

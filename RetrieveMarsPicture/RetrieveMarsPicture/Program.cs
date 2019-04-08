@@ -22,87 +22,56 @@ namespace Sincioco {
 
 	class RetrieveMarsPicture {
 
-		// Parameters that could be passed into the args in Main (in future versions)
-		static string workingDirectory = @"C:\Temp\";
-		static string localPathForSavingImages = workingDirectory;
-		static string requestFile = workingDirectory + "NASARequest.txt";
-		static string basePoint = @"https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY&date={0}";
-
-		static string HTMLOutputFilename = workingDirectory + "Results.html";
-		static string HTMLOutputTemplate = @"
-			<html>
-			<body>
-			{0}
-			</body>
-			</html>
-		";
-
-		static string HTMLImageTemplate = @"
-			<img src=""{0}"" style=""width:505"">
-		";
-
-		static string[] sampleTextFileWithDates = { "02/27/17", "June 2, 2018", "Jul-13-2016", "April 31, 2018" };
-
 		static void Main(string[] args) {
 
 			// Ensure C:\Temp exists
-			System.IO.Directory.CreateDirectory(workingDirectory);
+			System.IO.Directory.CreateDirectory(Constant.workingDirectory);
 
 			// Ensure NASARequest.txt exists
-			if (File.Exists(requestFile) == false) {
-				File.WriteAllLines(requestFile, sampleTextFileWithDates);
+			if (File.Exists(Constant.requestFile) == false) {
+				File.WriteAllLines(Constant.requestFile, Constant.sampleTextFileWithDates);
 			}
 
-			if (File.Exists(requestFile) == true) {
+			// Read the file containing the list of dates and iterate
+			// through them, sending a GET request to NASA and downloading
+			// the Mars image.
 
-				// Read the file containing the list of dates and iterate
-				// through them, sending a GET request to NASA and downloading
-				// the Mars image.
+			List<string> listOfFileNames = new List<string>();		// Used for the HTML Output (a list of image file names)
+			string[] dates = File.ReadAllLines(Constant.requestFile);
 
-				List<string> listOfFileNames = new List<string>();		// Used for the HTML Output (a list of image file names)
-				string[] dates = File.ReadAllLines(requestFile);
+			for (int i = 0; i < dates.Length; i++) {
 
-				for (int i = 0; i < dates.Length; i++) {
+				DateTime date;
 
-					DateTime date;
+				if (DateTime.TryParse(dates[i], out date) == true) {
 
-					if (DateTime.TryParse(dates[i], out date) == true) {
+					// We have a valid date
 
-						// We have a valid date
+					string requestDate = date.ToString("yyyy-MM-dd");
+					string filename = null;
+					Console.WriteLine(requestDate);
 
-						string requestDate = date.ToString("yyyy-MM-dd");
-						string filename = null;
-						Console.WriteLine(requestDate);
+					string fullNASAEndPoint = String.Format(Constant.basePoint, requestDate);
 
-						string fullNASAEndPoint = String.Format(basePoint, requestDate);
+					// Download the Image for the specific date and return the filename
+					filename = DownloadMarsImage(fullNASAEndPoint).GetAwaiter().GetResult();
 
-						// Download the Image for the specific date and return the filename
-						filename = DownloadMarsImage(fullNASAEndPoint).GetAwaiter().GetResult();
-
-						// Collect the list of file names for the images we downloaded
-						if (filename != null) {
-							listOfFileNames.Add(filename);
-						}
-
-					} else {
-
-						// Error Handler for when an invalid date was supplied
-						Console.WriteLine(dates[i]);
-						Console.WriteLine("\tDate conversion failed. Check to make sure the date is valid.");
+					// Collect the list of file names for the images we downloaded
+					if (filename != null) {
+						listOfFileNames.Add(filename);
 					}
+
+				} else {
+
+					// Error Handler for when an invalid date was supplied
+					Console.WriteLine(dates[i]);
+					Console.WriteLine("\tDate conversion failed. Check to make sure the date is valid.");
 				}
+			}
 
-				if (listOfFileNames.Count > 0) {
-					CreateHTMLOutputFile(listOfFileNames.ToArray());
-
-					System.Diagnostics.Process.Start(HTMLOutputFilename);
-				}
-
-			} else {
-
-				// Error Handler for when we cannot find the expected file
-				Console.WriteLine(requestFile + " could not be found.  Please ensure that it exists and it contains a list of dates.");
-
+			if (listOfFileNames.Count > 0) {
+				CreateHTMLOutputFile(listOfFileNames.ToArray());
+				System.Diagnostics.Process.Start(Constant.HTMLOutputFilename);
 			}
 
 			Console.WriteLine("Press a key to continue");
@@ -117,14 +86,14 @@ namespace Sincioco {
 			using (HttpClient httpClient = new HttpClient()) {
 
 				string result = null;
-				ResultfromNASA resultFromNASA = null;
+				Result resultFromNASA = null;
 
 				try {
 
 					// Send a HTTP Get request to NASA and deserialize the returned JSON result
 					HttpResponseMessage response = await httpClient.GetAsync(RequestUri);
 					var responseContent = await response.Content.ReadAsStringAsync();
-					resultFromNASA = JsonConvert.DeserializeObject<ResultfromNASA>(responseContent);
+					resultFromNASA = JsonConvert.DeserializeObject<Result>(responseContent);
 
 					// Ensure we got an Image URL
 					if (String.IsNullOrEmpty(resultFromNASA.url) == false) {
@@ -136,14 +105,14 @@ namespace Sincioco {
 						Console.WriteLine("\tDownloading " + filename);
 
 						// Check if the file already exists
-						if (File.Exists(workingDirectory + filename) == false ) {
+						if (File.Exists(Constant.workingDirectory + filename) == false ) {
 
 							// If it doesn't exists, downloaded the file 
 							using (WebClient client = new WebClient()) {
 
-								client.DownloadFile(new Uri(resultFromNASA.url), localPathForSavingImages + filename);
+								client.DownloadFile(new Uri(resultFromNASA.url), Constant.localPathForSavingImages + filename);
 
-								Console.WriteLine("\t  Saved to " + localPathForSavingImages + filename);
+								Console.WriteLine("\t  Saved to " + Constant.localPathForSavingImages + filename);
 
 								// We need this for the HTML Output
 								result = filename;
@@ -154,7 +123,7 @@ namespace Sincioco {
 							// Otherwise, just use return the previously downloaded file (we need this for the HTML Output)
 
 							// Make sure it's not zero bytes (a failed download)
-							if (new System.IO.FileInfo(workingDirectory + filename).Length > 0) {
+							if (new System.IO.FileInfo(Constant.workingDirectory + filename).Length > 0) {
 								result = filename;
 							}
 						}
@@ -188,12 +157,12 @@ namespace Sincioco {
 			string workingHTML = string.Empty;
 
 			for (int i = 0; i < fileList.Length; i++) {
-				workingHTML += String.Format(HTMLImageTemplate, fileList[i]);
+				workingHTML += String.Format(Constant.HTMLImageTemplate, fileList[i]);
 			}
 
-			HTMLToOutput = String.Format(HTMLOutputTemplate, workingHTML);
+			HTMLToOutput = String.Format(Constant.HTMLOutputTemplate, workingHTML);
 
-			File.WriteAllText(HTMLOutputFilename, HTMLToOutput);
+			File.WriteAllText(Constant.HTMLOutputFilename, HTMLToOutput);
 
 		}
 
