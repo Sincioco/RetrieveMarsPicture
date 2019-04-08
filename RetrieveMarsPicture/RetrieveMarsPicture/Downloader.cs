@@ -90,6 +90,7 @@ namespace Sincioco {
 
 		}
 
+		// ------------------------------------------------------------------------------------------
 		/// <summary>
 		/// Given an array of Photos, retrieve all the images
 		/// </summary>
@@ -186,17 +187,5 @@ namespace Sincioco {
 			return result;
 		}
 
-		public void Test() {
-
-			string responseContent = File.ReadAllText("Photo_One.json");
-
-			Photo webAPIResult = JsonConvert.DeserializeObject<Photo>(responseContent);
-
-			string responseContent1 = File.ReadAllText("Photo_Many.json");
-
-			Photos webAPIResult1 = JsonConvert.DeserializeObject<Photos>(responseContent1);
-
-			int a = 1 + 2;
-		}
 	}
 }
