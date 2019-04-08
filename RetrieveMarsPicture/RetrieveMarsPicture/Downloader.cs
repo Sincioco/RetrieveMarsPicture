@@ -1,4 +1,13 @@
-﻿
+﻿// ====================================================================================================
+//                                           Mars Picture Downloader
+// ====================================================================================================
+// Programmed By:  Louiery R. Sincioco													  Version:  .01
+// Programmed Date:  April 8, 2019
+// ====================================================================================================
+// Purpose:  Encapsulate all the methods necessary to download a series of MARS images from NASA
+//           into a class so it can be unit tested.
+// ====================================================================================================
+
 using Newtonsoft.Json;
 using System;
 using System.IO;
@@ -54,25 +63,6 @@ namespace Sincioco {
 					var responseContent = await response.Content.ReadAsStringAsync();
 					webAPIResult = JsonConvert.DeserializeObject<Result>(responseContent);
 
-					// Ensure we got an Image URL
-					if (String.IsNullOrEmpty(webAPIResult.url) == false) {
-
-						// Extract just the filename
-						string filename = System.IO.Path.GetFileName(webAPIResult.url);
-
-						Console.WriteLine("\tImage URL Retrieved:\n\t  " + webAPIResult.url);
-						Console.WriteLine("\tDownloading " + filename);
-
-						// Download the file
-						if (this.DownloadFile(webAPIResult.url, Constant.localPathForSavingImages + filename) == true) {
-							Console.WriteLine("\t  Saved to " + Constant.localPathForSavingImages + filename);
-							result = filename;
-						}
-
-					} else {
-						Console.WriteLine("\tNo results were returned.\n\t  You may have exceeded your hourly quota from NASA.");
-					}
-
 				} catch (Exception ex) {
 
 					// Error Handler for when we have no Internet connection or we could not reach the remote server.
@@ -81,6 +71,25 @@ namespace Sincioco {
 					if (String.IsNullOrEmpty(ex.InnerException.Message) == false) {
 						Console.WriteLine("\t  " + ex.InnerException.Message);
 					}
+				}
+
+				// Ensure we got an Image URL
+				if (String.IsNullOrEmpty(webAPIResult.url) == false) {
+
+					// Extract just the filename
+					string filename = System.IO.Path.GetFileName(webAPIResult.url);
+
+					Console.WriteLine("\tImage URL Retrieved:\n\t  " + webAPIResult.url);
+					Console.WriteLine("\tDownloading " + filename);
+
+					// Download the file
+					if (this.DownloadFile(webAPIResult.url, Constant.localPathForSavingImages + filename) == true) {
+						Console.WriteLine("\t  Saved to " + Constant.localPathForSavingImages + filename);
+						result = filename;
+					}
+
+				} else {
+					Console.WriteLine("\tNo results were returned.\n\t  You may have exceeded your hourly quota from NASA.");
 				}
 
 				return result;
@@ -106,8 +115,8 @@ namespace Sincioco {
 					result = true;
 				}
 
-			} catch (Exception ex) {
-				throw ex;
+			} catch (Exception) {
+				throw;
 			}
 
 
@@ -115,7 +124,7 @@ namespace Sincioco {
 		}
 
 		// ------------------------------------------------------------------------------------------
-		public bool CreateHTMLOutputFile(string[] fileList) {
+		public bool CreateHTMLOutputFile(string[] fileList, string outputFilename) {
 
 			bool result = false;
 
@@ -131,7 +140,7 @@ namespace Sincioco {
 				HTMLToOutput = String.Format(Constant.HTMLOutputTemplate, workingHTML);
 
 				try {
-					File.WriteAllText(Constant.HTMLOutputFilename, HTMLToOutput);
+					File.WriteAllText(outputFilename, HTMLToOutput);
 					result = true;
 				} catch (Exception) {
 					throw;

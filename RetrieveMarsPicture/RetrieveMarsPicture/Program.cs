@@ -48,7 +48,7 @@ namespace Sincioco {
 			if (filesDownloaded.Count > 0) {
 
 				// Create HTML Output file and launch it in the browser.
-				downloader.CreateHTMLOutputFile(filesDownloaded.ToArray());
+				downloader.CreateHTMLOutputFile(filesDownloaded.ToArray(), Constant.HTMLOutputFilename);
 				System.Diagnostics.Process.Start(Constant.HTMLOutputFilename);
 			}
 
