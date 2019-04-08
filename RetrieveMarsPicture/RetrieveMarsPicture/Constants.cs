@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace Sincioco {
 
+	/// <summary>
+	/// The various constants used throughout this program.
+	/// </summary>
 	public static class Constant {
 
 		// The working directory

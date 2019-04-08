@@ -1,16 +1,17 @@
-﻿using Newtonsoft.Json;
+﻿
+using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Sincioco {
 
-	public class MarsDownloader {
+	/// <summary>
+	/// Takes care of downloading an image from MARS using NASA's public API.
+	/// </summary>
+	public class Downloader {
 
 		// ------------------------------------------------------------------------------------------
 		/// <summary>

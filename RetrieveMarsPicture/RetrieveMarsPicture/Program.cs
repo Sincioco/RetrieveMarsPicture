@@ -19,7 +19,7 @@ namespace Sincioco {
 		// ------------------------------------------------------------------------------------------
 		static void Main(string[] args) {
 
-			MarsDownloader downloader = new MarsDownloader();
+			Downloader downloader = new Downloader();
 			downloader.EnsureRequestFileWithDatesExists();								// C:\Temp\NASARequest.txt
 
 			// Used for the HTML Output (a list of image file names)

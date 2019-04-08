@@ -5,6 +5,10 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Sincioco {
+
+	/// <summary>
+	/// The structure of the data that NASA's API returns.
+	/// </summary>
 	public class Result {
 		public string copyright { get; set; }
 		public string date { get; set; }

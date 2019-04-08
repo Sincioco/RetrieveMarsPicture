@@ -6,9 +6,8 @@ Created this fun little program that can download a series of MARS images from N
 
   - An ability to read in a text file that contains the dates of the MARS images to download.
   - The dates in the file can be in various formats, as long as it is a valid date.
-  - We won't re-down images we have already downloaded.
-  - Files are stored (hard coded) in C:\Temp\, and a Results.html file is generated.
-  - Once all the images have been download, the browser will launch and load Results.html.
+  - Files are stored C:\Temp\ and a Results.html file is generated.
+  - Once all the images have been download, the browser will launch and load Results.html displaying all the images that were successfully downloaded.
 
 # Areas that Can Be Improved On
 
