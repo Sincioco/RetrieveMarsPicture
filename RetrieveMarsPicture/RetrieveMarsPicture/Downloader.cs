@@ -10,6 +10,7 @@
 
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Http;
@@ -43,7 +44,9 @@ namespace Sincioco {
 		/// </summary>
 		/// <param name="date">In the format yyyy-MM-dd</param>
 		/// <returns>A filename if successfully downloaded and saved locally</returns>
-		public async Task<string> RetrieveImageWithDate(DateTime date) {
+		public async Task<Photos> RetrievePhotosMetadata(DateTime date, bool flag_UseTestData = false) {
+
+			Photos webAPIResult = null;
 
 			string requestDate = date.ToString("yyyy-MM-dd");
 			string RequestUri = String.Format(Constant.basePoint, requestDate);
@@ -53,47 +56,73 @@ namespace Sincioco {
 
 			using (HttpClient httpClient = new HttpClient()) {
 
-				string result = null;
-				Result webAPIResult = null;
+				string responseContent = string.Empty;
 
-				try {
+				if (flag_UseTestData == false) {
 
-					// Send a HTTP Get request to NASA and deserialize the returned JSON result
-					HttpResponseMessage response = await httpClient.GetAsync(RequestUri);
-					var responseContent = await response.Content.ReadAsStringAsync();
-					webAPIResult = JsonConvert.DeserializeObject<Result>(responseContent);
+					try {
 
-				} catch (Exception ex) {
+						// Send a HTTP Get request to NASA and deserialize the returned JSON result
+						HttpResponseMessage response = await httpClient.GetAsync(RequestUri);
+						responseContent = await response.Content.ReadAsStringAsync();
 
-					// Error Handler for when we have no Internet connection or we could not reach the remote server.
-					Console.WriteLine("\tERROR: " + ex.Message);
+					} catch (Exception ex) {
 
-					if (String.IsNullOrEmpty(ex.InnerException.Message) == false) {
-						Console.WriteLine("\t  " + ex.InnerException.Message);
-					}
-				}
+						// Error Handler for when we have no Internet connection or we could not reach the remote server.
+						Console.WriteLine("\tERROR: " + ex.Message);
 
-				// Ensure we got an Image URL
-				if (String.IsNullOrEmpty(webAPIResult.url) == false) {
-
-					// Extract just the filename
-					string filename = System.IO.Path.GetFileName(webAPIResult.url);
-
-					Console.WriteLine("\tImage URL Retrieved:\n\t  " + webAPIResult.url);
-					Console.WriteLine("\tDownloading " + filename);
-
-					// Download the file
-					if (this.DownloadFile(webAPIResult.url, Constant.localPathForSavingImages + filename) == true) {
-						Console.WriteLine("\t  Saved to " + Constant.localPathForSavingImages + filename);
-						result = filename;
+						if (String.IsNullOrEmpty(ex.InnerException.Message) == false) {
+							Console.WriteLine("\t  " + ex.InnerException.Message);
+						}
 					}
 
 				} else {
-					Console.WriteLine("\tNo results were returned.\n\t  You may have exceeded your hourly quota from NASA.");
+					// Use for Unit Testing or once we have exceeded our daily API call Limit
+					responseContent = File.ReadAllText("Photo_Two.json");
 				}
 
-				return result;
+				if (String.IsNullOrEmpty(responseContent) == false) {
+					webAPIResult = JsonConvert.DeserializeObject<Photos>(responseContent);
+				}
+
+				return webAPIResult;
 			}
+
+		}
+
+		/// <summary>
+		/// Given an array of Photos, retrieve all the images
+		/// </summary>
+		/// <param name="photos">The top-level object that contains a property named 'photos' which is an array of MARS photo.</param>
+		/// <returns>a list of filenames that were saved locally</returns>
+		public List<DownloadedFile> DownloadMARSPhotos(Photos photos) {
+
+			List<DownloadedFile> downloadedFiles = new List<DownloadedFile>();
+
+			foreach (Photo photo in photos.photos) {
+
+				// Ensure we got an Image URL
+				if (String.IsNullOrEmpty(photo.img_src) == false) {
+
+					// Extract just the filename
+					string filename = System.IO.Path.GetFileName(photo.img_src);
+
+					//Console.WriteLine("\tImage URL Retrieved:\n\t  " + photo.img_src);
+					Console.WriteLine("\tDownloading " + filename);
+
+					// Download the file
+					if (this.DownloadFile(photo.img_src, Constant.localPathForSavingImages + filename) == true) {
+						Console.WriteLine("\t  Saved to " + Constant.localPathForSavingImages + filename);
+						DownloadedFile downloadfile = new DownloadedFile() { filename = filename, earth_date = photo.earth_date };
+						downloadedFiles.Add(downloadfile);
+					}
+
+				} else {
+					Console.WriteLine("\tNo image were returned.\n\t  You may have exceeded your hourly quota from NASA.");
+				}
+			}
+
+			return downloadedFiles;
 
 		}
 
@@ -124,17 +153,24 @@ namespace Sincioco {
 		}
 
 		// ------------------------------------------------------------------------------------------
-		public bool CreateHTMLOutputFile(string[] fileList, string outputFilename) {
+		public bool CreateHTMLOutputFile(List<DownloadedFile> downloadedFiles, string outputFilename) {
 
 			bool result = false;
 
-			if (fileList.Length > 0) {
+			if (downloadedFiles.Count > 0) {
 
 				string HTMLToOutput = string.Empty;
 				string workingHTML = string.Empty;
+				string lastEarthDay = string.Empty;
 
-				for (int i = 0; i < fileList.Length; i++) {
-					workingHTML += String.Format(Constant.HTMLImageTemplate, fileList[i]);
+				foreach (DownloadedFile file in downloadedFiles) {
+
+					if (file.earth_date != lastEarthDay) {
+						workingHTML += String.Format(Constant.HTMLEarthDaySeperatorTemplate, file.earth_date);
+					}
+
+					workingHTML += String.Format(Constant.HTMLImageTemplate, file.filename);
+					lastEarthDay = file.earth_date;
 				}
 
 				HTMLToOutput = String.Format(Constant.HTMLOutputTemplate, workingHTML);
@@ -148,6 +184,19 @@ namespace Sincioco {
 			}
 
 			return result;
+		}
+
+		public void Test() {
+
+			string responseContent = File.ReadAllText("Photo_One.json");
+
+			Photo webAPIResult = JsonConvert.DeserializeObject<Photo>(responseContent);
+
+			string responseContent1 = File.ReadAllText("Photo_Many.json");
+
+			Photos webAPIResult1 = JsonConvert.DeserializeObject<Photos>(responseContent1);
+
+			int a = 1 + 2;
 		}
 	}
 }

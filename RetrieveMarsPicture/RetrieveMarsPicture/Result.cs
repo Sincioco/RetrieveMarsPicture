@@ -9,14 +9,46 @@ namespace Sincioco {
 	/// <summary>
 	/// The structure of the data that NASA's API returns.
 	/// </summary>
-	public class Result {
-		public string copyright { get; set; }
-		public string date { get; set; }
-		public string explanation { get; set; }
-		public string hdurl { get; set; }
-		public string media_type { get; set; }
-		public string service_version { get; set; }
-		public string title { get; set; }
-		public string url { get; set; }
+	/// 
+	public class Photos {
+		public Photo[] photos { get; set; }
+	}
+	public class Photo {
+		public string id { get; set; }
+		public string sol { get; set; }
+		public Camera camera { get; set; }
+		public Rover rover { get; set; }
+		public string earth_date { get; set; }
+		public string img_src { get; set; }
+	}
+
+	public class Camera {
+		public string id { get; set; }
+		public string name { get; set; }
+		public int rover_id { get; set; }
+		public string full_name { get; set; }
+	}
+
+	public class Rover {
+		public string id { get; set; }
+		public string name { get; set; }
+		public string landing_date { get; set; }
+		public string launch_date { get; set; }
+		public string status { get; set; }
+		public int max_sol { get; set; }
+		public string max_date { get; set; }
+		public int total_photos { get; set; }
+		public Cameras[] cameras { get; set; } 
+
+	}
+
+	public class Cameras {
+		public string name { get; set; }
+		public string full_name { get; set; }
+	}
+
+	public class DownloadedFile {
+		public string filename { get; set; }
+		public string earth_date { get; set; }
 	}
 }

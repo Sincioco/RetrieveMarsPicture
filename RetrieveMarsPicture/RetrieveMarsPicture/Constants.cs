@@ -24,7 +24,7 @@ namespace Sincioco {
 		public static readonly string[] sampleTextFileWithDates = { "02/27/17", "June 2, 2018", "Jul-13-2016", "April 31, 2018" };
 
 		// The NASA public end point so we can fetch the MARS images as per the list of dates
-		public const string basePoint = @"https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY&date={0}";
+		public const string basePoint = @"https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/photos?earth_date={0}&api_key=DEMO_KEY";
 
 		// The HTML output we will generate at the end of the program execution
 		public const string HTMLOutputFilename = workingDirectory + "Results.html";
@@ -42,6 +42,10 @@ namespace Sincioco {
 		// A basic HTML image tag (notice we hard-coded a width of 50% on purpose so we can see multiple images on one screen) 
 		public const string HTMLImageTemplate = @"
 			<img src=""{0}"" style=""width:500"">
+		";
+
+		public const string HTMLEarthDaySeperatorTemplate = @"
+			<h2>{0}</h2>
 		";
 
 	}

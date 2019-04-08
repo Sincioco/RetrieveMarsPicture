@@ -20,24 +20,25 @@ namespace Sincioco {
 		static void Main(string[] args) {
 
 			Downloader downloader = new Downloader();
-			downloader.EnsureRequestFileWithDatesExists();								// C:\Temp\NASARequest.txt
+			downloader.EnsureRequestFileWithDatesExists();                              // C:\Temp\NASARequest.txt
 
 			// Used for the HTML Output (a list of image file names)
-			List<string> filesDownloaded = new List<string>();
+			List<DownloadedFile> downloadedFiles = new List<DownloadedFile>();
 			string[] dates = File.ReadAllLines(Constant.inputFileWithListOfDates);
 
 			// Iterate through the list of dates
 			for (int i = 0; i < dates.Length; i++) {
 
-				DateTime date;
-
-				if (DateTime.TryParse(dates[i], out date) == true) {
+				if (DateTime.TryParse(dates[i], out DateTime date) == true) {
 
 					// Download the Image for the specific date and return the filename
-					string filename = downloader.RetrieveImageWithDate(date).GetAwaiter().GetResult();
+					Photos photos = downloader.RetrievePhotosMetadata(date).GetAwaiter().GetResult();
+
+					List<DownloadedFile> downloadedPhotos = downloader.DownloadMARSPhotos(photos);
 
 					// Collect the list of file names for the images we downloaded (for the HTML output)
-					if (filename != null) filesDownloaded.Add(filename);
+					//if (filename != null) filesDownloaded.Add(filename);
+					if (downloadedPhotos.Count > 0) downloadedFiles.AddRange(downloadedPhotos);
 
 				} else {
 					Console.WriteLine(dates[i]);
@@ -45,10 +46,10 @@ namespace Sincioco {
 				}
 			}
 
-			if (filesDownloaded.Count > 0) {
+			if (downloadedFiles.Count > 0) {
 
 				// Create HTML Output file and launch it in the browser.
-				downloader.CreateHTMLOutputFile(filesDownloaded.ToArray(), Constant.HTMLOutputFilename);
+				downloader.CreateHTMLOutputFile(downloadedFiles, Constant.HTMLOutputFilename);
 				System.Diagnostics.Process.Start(Constant.HTMLOutputFilename);
 			}
 
