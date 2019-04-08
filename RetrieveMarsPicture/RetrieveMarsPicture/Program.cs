@@ -28,6 +28,19 @@ namespace Sincioco {
 		static string requestFile = workingDirectory + "NasaRequest.txt";
 		static string basePoint = @"https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY&date={0}";
 
+		static string HTMLOutputFilename = workingDirectory + "Results.html";
+		static string HTMLOutputTemplate = @"
+			<html>
+			<body>
+			{0}
+			</body>
+			</html>
+		";
+
+		static string HTMLImageTemplate = @"
+			<img src=""{0}"" style=""width:505"">
+		";
+
 		static void Main(string[] args) {
 
 			if (File.Exists(requestFile) == true) {
@@ -36,8 +49,7 @@ namespace Sincioco {
 				// through them, sending a GET request to NASA and downloading
 				// the Mars image.
 
-				ResultfromNASA resultFromNASA;
-
+				List<string> listOfFileNames = new List<string>();		// Used for the HTML Output (a list of image file names)
 				string[] dates = File.ReadAllLines(requestFile);
 
 				for (int i = 0; i < dates.Length; i++) {
@@ -49,12 +61,18 @@ namespace Sincioco {
 						// We have a valid date
 
 						string requestDate = date.ToString("yyyy-MM-dd");
+						string filename = null;
 						Console.WriteLine(requestDate);
 
 						string fullNASAEndPoint = String.Format(basePoint, requestDate);
 
-						// Download the Image for the specific date
-						resultFromNASA = DonwloadMarsImage(fullNASAEndPoint).GetAwaiter().GetResult();
+						// Download the Image for the specific date and return the filename
+						filename = DonwloadMarsImage(fullNASAEndPoint).GetAwaiter().GetResult();
+
+						// Collect the list of file names for the images we downloaded
+						if (filename != null) {
+							listOfFileNames.Add(filename);
+						}
 
 					} else {
 
@@ -62,6 +80,12 @@ namespace Sincioco {
 						Console.WriteLine(dates[i]);
 						Console.WriteLine("\tDate conversion failed. Check to make sure the date is valid.");
 					}
+				}
+
+				if (listOfFileNames.Count > 0) {
+					CreateHTMLOutputFile(listOfFileNames.ToArray());
+
+					System.Diagnostics.Process.Start(HTMLOutputFilename);
 				}
 
 			} else {
@@ -76,33 +100,53 @@ namespace Sincioco {
 
 		}
 
-		static async Task<ResultfromNASA> DonwloadMarsImage(string RequestUri) {
+		static async Task<string> DonwloadMarsImage(string RequestUri) {
 
 			Console.WriteLine("\tWeb Request Sent to:\n\t  " + RequestUri);
 
 			using (HttpClient httpClient = new HttpClient()) {
 
-				ResultfromNASA result = null;
+				string result = null;
+				ResultfromNASA resultFromNASA = null;
 
 				try {
 
 					// Send a HTTP Get request to NASA and deserialize the returned JSON result
 					HttpResponseMessage response = await httpClient.GetAsync(RequestUri);
 					var responseContent = await response.Content.ReadAsStringAsync();
-					result = JsonConvert.DeserializeObject<ResultfromNASA>(responseContent);
+					resultFromNASA = JsonConvert.DeserializeObject<ResultfromNASA>(responseContent);
 
-					// Ensure we got a valid Image URL
-					if (String.IsNullOrEmpty(result.url) == false) {
+					// Ensure we got an Image URL
+					if (String.IsNullOrEmpty(resultFromNASA.url) == false) {
 
-						string filename = System.IO.Path.GetFileName(result.url);
+						// Extract just the filename
+						string filename = System.IO.Path.GetFileName(resultFromNASA.url);
 
-						Console.WriteLine("\tImage URL Retrieved:\n\t  " + result.url);
+						Console.WriteLine("\tImage URL Retrieved:\n\t  " + resultFromNASA.url);
 						Console.WriteLine("\tDownloading " + filename);
 
-						// Download the file
-						using (WebClient client = new WebClient()) {
-							client.DownloadFile(new Uri(result.url), localPathForSavingImages + filename);
-							Console.WriteLine("\t  Saved to " + localPathForSavingImages + filename);
+						// Check if the file already exists
+						if (File.Exists(workingDirectory + filename) == false ) {
+
+							// If it doesn't exists, downloaded the file 
+							using (WebClient client = new WebClient()) {
+
+								client.DownloadFile(new Uri(resultFromNASA.url), localPathForSavingImages + filename);
+
+								Console.WriteLine("\t  Saved to " + localPathForSavingImages + filename);
+
+								// We need this for the HTML Output
+								result = filename;
+							}
+
+						} else {
+
+							// Otherwise, just use return the previously downloaded file (we need this for the HTML Output)
+
+							// Make sure it's not zero bytes (a failed download)
+							if (new System.IO.FileInfo(workingDirectory + filename).Length > 0) {
+								result = filename;
+							}
 						}
 					} else {
 
@@ -127,5 +171,21 @@ namespace Sincioco {
 			}
 
 		}
+
+		static void CreateHTMLOutputFile(string[] fileList) {
+
+			string HTMLToOutput = string.Empty;
+			string workingHTML = string.Empty;
+
+			for (int i = 0; i < fileList.Length; i++) {
+				workingHTML += String.Format(HTMLImageTemplate, fileList[i]);
+			}
+
+			HTMLToOutput = String.Format(HTMLOutputTemplate, workingHTML);
+
+			File.WriteAllText(HTMLOutputFilename, HTMLToOutput);
+
+		}
+
 	}
 }
