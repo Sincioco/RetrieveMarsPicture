@@ -25,7 +25,7 @@ namespace Sincioco {
 		// Parameters that could be passed into the args in Main (in future versions)
 		static string workingDirectory = @"C:\Temp\";
 		static string localPathForSavingImages = workingDirectory;
-		static string requestFile = workingDirectory + "NasaRequest.txt";
+		static string requestFile = workingDirectory + "NASARequest.txt";
 		static string basePoint = @"https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY&date={0}";
 
 		static string HTMLOutputFilename = workingDirectory + "Results.html";
@@ -41,7 +41,17 @@ namespace Sincioco {
 			<img src=""{0}"" style=""width:505"">
 		";
 
+		static string[] sampleTextFileWithDates = { "02/27/17", "June 2, 2018", "Jul-13-2016", "April 31, 2018" };
+
 		static void Main(string[] args) {
+
+			// Ensure C:\Temp exists
+			System.IO.Directory.CreateDirectory(workingDirectory);
+
+			// Ensure NASARequest.txt exists
+			if (File.Exists(requestFile) == false) {
+				File.WriteAllLines(requestFile, sampleTextFileWithDates);
+			}
 
 			if (File.Exists(requestFile) == true) {
 
@@ -67,7 +77,7 @@ namespace Sincioco {
 						string fullNASAEndPoint = String.Format(basePoint, requestDate);
 
 						// Download the Image for the specific date and return the filename
-						filename = DonwloadMarsImage(fullNASAEndPoint).GetAwaiter().GetResult();
+						filename = DownloadMarsImage(fullNASAEndPoint).GetAwaiter().GetResult();
 
 						// Collect the list of file names for the images we downloaded
 						if (filename != null) {
@@ -100,7 +110,7 @@ namespace Sincioco {
 
 		}
 
-		static async Task<string> DonwloadMarsImage(string RequestUri) {
+		static async Task<string> DownloadMarsImage(string RequestUri) {
 
 			Console.WriteLine("\tWeb Request Sent to:\n\t  " + RequestUri);
 
