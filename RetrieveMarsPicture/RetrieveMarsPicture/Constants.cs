@@ -33,6 +33,7 @@ namespace Sincioco {
 		public const string HTMLOutputTemplate = @"
 			<html>
 			<body>
+			<h1>MARS Images Downloaded</h1>
 			{0}
 			</body>
 			</html>
