@@ -54,12 +54,15 @@
     <Compile Include="Data Classes\Photos.cs" />
     <Compile Include="Data Classes\Rover.cs" />
     <Compile Include="Downloader.cs" />
+    <Compile Include="HTMLFileGenerator.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <None Include="packages.config" />
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="Test Data\Photo_Two.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

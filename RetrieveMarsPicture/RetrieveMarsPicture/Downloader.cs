@@ -153,39 +153,5 @@ namespace Sincioco {
 			return result;
 		}
 
-		// ------------------------------------------------------------------------------------------
-		public bool CreateHTMLOutputFile(List<DownloadedFile> downloadedFiles, string outputFilename) {
-
-			bool result = false;
-
-			if (downloadedFiles.Count > 0) {
-
-				string HTMLToOutput = string.Empty;
-				string workingHTML = string.Empty;
-				string lastEarthDay = string.Empty;
-
-				foreach (DownloadedFile file in downloadedFiles) {
-
-					if (file.earth_date != lastEarthDay) {
-						workingHTML += String.Format(Constant.HTMLEarthDaySeperatorTemplate, file.earth_date);
-					}
-
-					workingHTML += String.Format(Constant.HTMLImageTemplate, file.filename);
-					lastEarthDay = file.earth_date;
-				}
-
-				HTMLToOutput = String.Format(Constant.HTMLOutputTemplate, workingHTML);
-
-				try {
-					File.WriteAllText(outputFilename, HTMLToOutput);
-					result = true;
-				} catch (Exception) {
-					throw;
-				}
-			}
-
-			return result;
-		}
-
 	}
 }

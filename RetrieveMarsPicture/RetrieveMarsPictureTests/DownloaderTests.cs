@@ -9,6 +9,7 @@
 // ====================================================================================================
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -30,7 +31,7 @@ namespace Sincioco.Tests {
 		/// Test to make sure that the directory C:\Temp exists and the file NASARequest.txt in it.
 		/// </summary>
 		[TestMethod()]
-		public void Test001_EnsureRequestFileWithDatesExists() {			
+		public void Test001_EnsureRequestFileWithDatesExists() {
 
 			if (Directory.Exists(Constant.workingDirectory) == false) {
 				Assert.Fail(Constant.workingDirectory + " does not exist.");
@@ -53,16 +54,16 @@ namespace Sincioco.Tests {
 			if (File.Exists(Constant.inputFileWithListOfDates) == false) {
 				Assert.Fail(Constant.inputFileWithListOfDates + " does not exist.");
 			}
-			
+
 		}
 
 		[TestMethod()]
 		public void Test002_RetrieveImageWithDate() {
 
 			DateTime date = Convert.ToDateTime("2019-04-08");
-			string filename = downloader.RetrieveImageWithDate(date).GetAwaiter().GetResult();
+			Photos photos = downloader.RetrievePhotosMetadata(date).GetAwaiter().GetResult();
 
-			if (String.IsNullOrEmpty(filename) == true) {
+			if (photos == null) {
 				Assert.Fail("Unable to retrieve an image.  Please make sure you have not reached your daily API Limit quota from NASA.");
 			}
 		}
@@ -105,11 +106,16 @@ namespace Sincioco.Tests {
 		/// </summary>
 		[TestMethod()]
 		public void Test004_CreateHTMLOutputFile() {
-		
-			if (downloader.CreateHTMLOutputFile(new string[]{
-				"https://apod.nasa.gov/apod/image/1904/AzurePlumesNorway_Sutie_960.jpg" }, 
-				Constant.HTMLOutputFilename) == false) {
 
+			HTMLFileGenerator HTMLOutputter = new HTMLFileGenerator();
+			List<DownloadedFile> downloadedFile = new List<DownloadedFile>();
+
+			downloadedFile.Add(new DownloadedFile() {
+				earth_date = "2014-01-01",
+				filename = "https://apod.nasa.gov/apod/image/1904/AzurePlumesNorway_Sutie_960.jpg"
+			});
+
+			if (HTMLOutputter.GenerateHTMLFile(downloadedFile, Constant.HTMLOutputFilename) == false) {
 				Assert.Fail();
 			}
 		}
@@ -121,11 +127,17 @@ namespace Sincioco.Tests {
 		public void Test004_CreateHTMLOutputFile_ExceptionTestCoverage() {
 
 			string invalidPath = @"C:\InvalidFolder\Test.jpg";
+			HTMLFileGenerator HTMLOutputter = new HTMLFileGenerator();
+			List<DownloadedFile> downloadedFile = new List<DownloadedFile>();
+
+			downloadedFile.Add(new DownloadedFile() {
+				earth_date = "2014-01-01",
+				filename = "https://apod.nasa.gov/apod/image/1904/AzurePlumesNorway_Sutie_960.jpg"
+			});
 
 			try {
-				if (downloader.CreateHTMLOutputFile(new string[] {
-				"https://apod.nasa.gov/apod/image/1904/AzurePlumesNorway_Sutie_960.jpg" }, invalidPath) == false) {
 
+				if (HTMLOutputter.GenerateHTMLFile(downloadedFile, invalidPath) == false) {
 					Assert.Fail();
 				}
 			} catch {
