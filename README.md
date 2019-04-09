@@ -15,6 +15,8 @@ Created this fun little program that can download a series of MARS images from N
   - We could use more unit testing.
   - We could use more advance logging either to a text file or to a databse.
   - We could have stored the images into a database.
+  - Better code design / architecture to better adhere to the SOLID principle.
+  - Performance metrics.
 
 # Contact Me
   [![N|Solid](http://sincioco.com/Resume/Sin_San_Francisco_Cropped.png)](http://www.sincioco.com)

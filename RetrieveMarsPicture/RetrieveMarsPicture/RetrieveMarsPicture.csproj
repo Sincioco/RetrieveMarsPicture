@@ -47,24 +47,28 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Constants.cs" />
+    <Compile Include="Data Classes\Camera.cs" />
+    <Compile Include="Data Classes\Cameras.cs" />
+    <Compile Include="Data Classes\DownloadedFile.cs" />
+    <Compile Include="Data Classes\Photo.cs" />
+    <Compile Include="Data Classes\Photos.cs" />
+    <Compile Include="Data Classes\Rover.cs" />
     <Compile Include="Downloader.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Result.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
-    <None Include="Photo_Two.json">
+    <None Include="Test Data\Photo_Two.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="Readme.md" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Photo_One.json">
+    <None Include="Test Data\Photo_One.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="Photo_Many.json">
+    <None Include="Test Data\Photo_Many.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
